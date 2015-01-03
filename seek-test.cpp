@@ -42,10 +42,10 @@ int main() {
 				}
 			}
 
-#elif 1
+#elif 0
 			_max = 0x8200;
 			_min = 0x7e00;
-#elif 0
+#else
 			_max = 0xffff;
 			_min = 0x0;
 #endif
