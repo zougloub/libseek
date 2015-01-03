@@ -1,0 +1,10 @@
+prefix=@PREFIX@
+libdir=@LIBDIR@
+includedir=@PREFIX@/include
+
+Name: Seek
+Description: Interface for Seek Thermal Imagers (infrared cameras)
+Version: 0.1
+Libs: -L@LIBDIR@ -lseek
+Cflags: -I@PREFIX@/include
+Requires: libusb-1.0
