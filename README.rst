@@ -28,8 +28,8 @@ The example can be plugged onto ffmpeg like this:
 Installation
 ############
 
-The library uses `the waf build
-system<http://code.google.com/p/waf/>`_ to compile.
+The library uses `the waf build system <http://code.google.com/p/waf/>`_
+to compile.
 This is done using something like (assuming you want to install to /usr):
 
 .. code:: sh
