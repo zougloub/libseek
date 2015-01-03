@@ -93,3 +93,125 @@ TODO
 - Bad Pixel Compensation
 - Higher-level wrapper?
 - Movement-based super-resolution?
+
+
+Device Information
+******************
+
+``lsusb`` says::
+
+  Bus 002 Device 118: ID 289d:0010  
+  Device Descriptor:
+    bLength                18
+    bDescriptorType         1
+    bcdUSB               2.00
+    bDeviceClass            0 (Defined at Interface level)
+    bDeviceSubClass         0 
+    bDeviceProtocol         0 
+    bMaxPacketSize0        64
+    idVendor           0x289d 
+    idProduct          0x0010 
+    bcdDevice            1.00
+    iManufacturer           1 Seek Thermal
+    iProduct                2 PIR206 Thermal Camera
+    iSerial                 5 @Ă耀
+    bNumConfigurations      1
+    Configuration Descriptor:
+      bLength                 9
+      bDescriptorType         2
+      wTotalLength           64
+      bNumInterfaces          2
+      bConfigurationValue     1
+      iConfiguration          0 
+      bmAttributes         0x80
+        (Bus Powered)
+      MaxPower              100mA
+      Interface Descriptor:
+        bLength                 9
+        bDescriptorType         4
+        bInterfaceNumber        0
+        bAlternateSetting       0
+        bNumEndpoints           2
+        bInterfaceClass       255 Vendor Specific Class
+        bInterfaceSubClass    240 
+        bInterfaceProtocol      0 
+        iInterface              3 iAP Interface
+        Endpoint Descriptor:
+          bLength                 7
+          bDescriptorType         5
+          bEndpointAddress     0x01  EP 1 OUT
+          bmAttributes            2
+            Transfer Type            Bulk
+            Synch Type               None
+            Usage Type               Data
+          wMaxPacketSize     0x0200  1x 512 bytes
+          bInterval               0
+        Endpoint Descriptor:
+          bLength                 7
+          bDescriptorType         5
+          bEndpointAddress     0x81  EP 1 IN
+          bmAttributes            2
+            Transfer Type            Bulk
+            Synch Type               None
+            Usage Type               Data
+          wMaxPacketSize     0x0200  1x 512 bytes
+          bInterval               0
+      Interface Descriptor:
+        bLength                 9
+        bDescriptorType         4
+        bInterfaceNumber        1
+        bAlternateSetting       0
+        bNumEndpoints           0
+        bInterfaceClass       255 Vendor Specific Class
+        bInterfaceSubClass    240 
+        bInterfaceProtocol      1 
+        iInterface              4 com.thermal.pir206.1
+      Interface Descriptor:
+        bLength                 9
+        bDescriptorType         4
+        bInterfaceNumber        1
+        bAlternateSetting       1
+        bNumEndpoints           2
+        bInterfaceClass       255 Vendor Specific Class
+        bInterfaceSubClass    240 
+        bInterfaceProtocol      1 
+        iInterface              4 com.thermal.pir206.1
+        Endpoint Descriptor:
+          bLength                 7
+          bDescriptorType         5
+          bEndpointAddress     0x02  EP 2 OUT
+          bmAttributes            2
+            Transfer Type            Bulk
+            Synch Type               None
+            Usage Type               Data
+          wMaxPacketSize     0x0200  1x 512 bytes
+          bInterval               0
+        Endpoint Descriptor:
+          bLength                 7
+          bDescriptorType         5
+          bEndpointAddress     0x82  EP 2 IN
+          bmAttributes            2
+            Transfer Type            Bulk
+            Synch Type               None
+            Usage Type               Data
+          wMaxPacketSize     0x0200  1x 512 bytes
+          bInterval               0
+  Device Qualifier (for other device speed):
+    bLength                10
+    bDescriptorType         6
+    bcdUSB               2.00
+    bDeviceClass            0 (Defined at Interface level)
+    bDeviceSubClass         0 
+    bDeviceProtocol         0 
+    bMaxPacketSize0        64
+    bNumConfigurations      1
+  Device Status:     0x0000
+    (Bus Powered)
+
+This library is using the first interface ``iAP Interface``.
+
+The communication protocol is pretty simple, but there's no point (?)
+to understand it in order to write something usable.
+The camera is autonomous at providing data, after an initial configuration
+consisting in a handful of commands, and a "send me data now" request.
+
