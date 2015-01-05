@@ -89,7 +89,7 @@ Hey, this is on github, you know what to do!
 TODO
 ****
 
-- Thermal information in the frame (min/max values)
+- Thermal information in the frame (retrieve min/max values)
 - Bad Pixel Compensation
 - Higher-level wrapper?
 - Movement-based super-resolution?
@@ -98,19 +98,40 @@ TODO
 Device Information
 ******************
 
+
+Camera Information
+==================
+
+The camera uses a microbolometer array of 12 µm pixels.
+
+It has some kind of shutter, used to perform Flat Field Correction
+regularly
+(http://www.flir.com/cvs/cores/knowledgebase/index.cfm?CFTREEITEMKEY=342&view=35774,
+http://www.google.ca/patents/US8373757)
+and making the camera alternatively provide shutter images and scene
+images (shutter operating once every 23 pictures after start-up, and
+also generating one more unusable frame before the calibration frame).
+
+Issues have been reported with the FFC, and a thermal gradient can be
+seen through the image.
+
+
+Reading from the Camera
+=======================
+
 ``lsusb`` says::
 
-  Bus 002 Device 118: ID 289d:0010  
+  Bus 002 Device 118: ID 289d:0010
   Device Descriptor:
     bLength                18
     bDescriptorType         1
     bcdUSB               2.00
     bDeviceClass            0 (Defined at Interface level)
-    bDeviceSubClass         0 
-    bDeviceProtocol         0 
+    bDeviceSubClass         0
+    bDeviceProtocol         0
     bMaxPacketSize0        64
-    idVendor           0x289d 
-    idProduct          0x0010 
+    idVendor           0x289d
+    idProduct          0x0010
     bcdDevice            1.00
     iManufacturer           1 Seek Thermal
     iProduct                2 PIR206 Thermal Camera
@@ -122,7 +143,7 @@ Device Information
       wTotalLength           64
       bNumInterfaces          2
       bConfigurationValue     1
-      iConfiguration          0 
+      iConfiguration          0
       bmAttributes         0x80
         (Bus Powered)
       MaxPower              100mA
@@ -133,8 +154,8 @@ Device Information
         bAlternateSetting       0
         bNumEndpoints           2
         bInterfaceClass       255 Vendor Specific Class
-        bInterfaceSubClass    240 
-        bInterfaceProtocol      0 
+        bInterfaceSubClass    240
+        bInterfaceProtocol      0
         iInterface              3 iAP Interface
         Endpoint Descriptor:
           bLength                 7
@@ -163,8 +184,8 @@ Device Information
         bAlternateSetting       0
         bNumEndpoints           0
         bInterfaceClass       255 Vendor Specific Class
-        bInterfaceSubClass    240 
-        bInterfaceProtocol      1 
+        bInterfaceSubClass    240
+        bInterfaceProtocol      1
         iInterface              4 com.thermal.pir206.1
       Interface Descriptor:
         bLength                 9
@@ -173,8 +194,8 @@ Device Information
         bAlternateSetting       1
         bNumEndpoints           2
         bInterfaceClass       255 Vendor Specific Class
-        bInterfaceSubClass    240 
-        bInterfaceProtocol      1 
+        bInterfaceSubClass    240
+        bInterfaceProtocol      1
         iInterface              4 com.thermal.pir206.1
         Endpoint Descriptor:
           bLength                 7
@@ -201,8 +222,8 @@ Device Information
     bDescriptorType         6
     bcdUSB               2.00
     bDeviceClass            0 (Defined at Interface level)
-    bDeviceSubClass         0 
-    bDeviceProtocol         0 
+    bDeviceSubClass         0
+    bDeviceProtocol         0
     bMaxPacketSize0        64
     bNumConfigurations      1
   Device Status:     0x0000
@@ -213,5 +234,30 @@ This library is using the first interface ``iAP Interface``.
 The communication protocol is pretty simple, but there's no point (?)
 to understand it in order to write something usable.
 The camera is autonomous at providing data, after an initial configuration
-consisting in a handful of commands, and a "send me data now" request.
+consisting in a handful of commands, and a "send me data now" request
+it will provide image frames.
+
+There are different type of frames, that are identified by an in-band
+status byte located at position 20:
+
+- Regular frames (code 3)
+- Flat Field Calibration frames (code 1)
+- Unusable frames (code 6), probably because the shutter is in progress
+- ...
+
+The raw frame data contains regular "holes", values that are "black
+pixels" by design.
+The missing values are reconstructed using interpolation from
+neighboring cells.
+The locations are predicted, but it's also possible to identify them
+because the values are also missing in calibration frames.
+
+
+Library Design
+**************
+
+Black pixels are detected by noticing that their value is zero both in
+the calibration frame and in the image frames.
+
+.. TODO: actually see whether that's the right way, doing a dump
 
