@@ -90,6 +90,7 @@ TODO
 ****
 
 - Thermal information in the frame (retrieve min/max values)
+- Absolute temperature reading
 - Bad Pixel Compensation
 - Higher-level wrapper?
 - Movement-based super-resolution?
@@ -114,6 +115,14 @@ also generating one more unusable frame before the calibration frame).
 
 Issues have been reported with the FFC, and a thermal gradient can be
 seen through the image.
+
+The sensor array has a fraction (TODO provide) of what we'll call
+*black pixels*, pixels that carry no usable data by design.
+They are thought to exist to improve the SNR.
+
+There are also bad pixels, which are relatively frequent, at least on
+my unit... where I can see TODO of them.
+Thus, some kind of compensation needs to be performed on these bad pixels.
 
 
 Reading from the Camera
@@ -259,5 +268,16 @@ Library Design
 Black pixels are detected by noticing that their value is zero both in
 the calibration frame and in the image frames.
 
-.. TODO: actually see whether that's the right way, doing a dump
+.. TODO:: actually see whether that's the right way, doing a dump
+
+
+Bad pixels are identified (in ``test-calib.py``)
+by summing over many frames, the difference between pixel data and
+neighboring pixels. This has proven simple enough.
+
+Bad pixels are corrected (in ``test-viewer.py``)
+by considering the blurred image instead of the original image, at the
+location of bad pixels.
+
+Absolute temperature readings are provided by TODO.
 
