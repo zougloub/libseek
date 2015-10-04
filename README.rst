@@ -34,7 +34,7 @@ This is done using something like (assuming you want to install to /usr):
 
 .. code:: sh
 
-   curl http://ftp.waf.io/pub/release/waf-1.8.5 > waf
+   curl https://waf.io/waf-1.8.14 > waf
    python waf configure --prefix /usr
    python waf
    sudo python waf install --destdir /
@@ -89,10 +89,20 @@ Hey, this is on github, you know what to do!
 TODO
 ****
 
+- Bad Pixel Compensation - Calibration clean-up
+
+  Bad pixels (and bad clusters) are corrected by the core library,
+  but the code used to generate the correction information is not
+  that straightforward to use.
+
+- gstreamer source
+
 - Thermal information in the frame (retrieve min/max values)
+
 - Absolute temperature reading
-- Bad Pixel Compensation
+
 - Higher-level wrapper?
+
 - Movement-based super-resolution?
 
 
