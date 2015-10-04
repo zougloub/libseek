@@ -26,15 +26,15 @@ if __name__ == '__main__':
 		print("min=%s" % x)
 		_min = x
 
-	cv2.cv.CreateTrackbar('min', 'seek', _min, 0xffff, minchange)
-	
+	cv2.createTrackbar('min', 'seek', _min, 0xffff, minchange)
+
 	_max = 0x8200
 	def maxchange(x):
 		global _max
 		print("max=%s" % x)
 		_max = x
 
-	cv2.cv.CreateTrackbar('max', 'seek', _max, 0xffff, maxchange)
+	cv2.createTrackbar('max', 'seek', _max, 0xffff, maxchange)
 
 	try:
 		while True:
