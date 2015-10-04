@@ -11,13 +11,6 @@ if __name__ == '__main__':
 	 stdout=subprocess.PIPE,
 	)
 
-	grid_fn = '1grid.png'
-	if os.path.exists(grid_fn):
-		grid = cv2.imread('1grid.png')/255
-		grid, a, b = cv2.split(grid)
-	else:
-		grid = np.zeros((156, 208))
-
 	cv2.namedWindow('seek', cv2.WINDOW_NORMAL)
 
 	_min = 0x7e00
@@ -46,13 +39,10 @@ if __name__ == '__main__':
 			img[img<0] = 0
 			img /= (_max-_min)
 
-			b = cv2.blur(img, (9,9))
-			a = img * (1.0 - grid) + b * (grid)
-
 			if 1:
-				a = np.rot90(a, 3)
+				img = np.rot90(img, 3)
 
-			cv2.imshow('seek', a)
+			cv2.imshow('seek', img)
 			key = cv2.waitKey(1)
 			if key == 113: # q
 				break
