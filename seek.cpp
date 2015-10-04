@@ -1,12 +1,14 @@
 #include <cassert>
 #include <cstring>
 #include <sstream>
+#include <fstream>
 #include <stdexcept>
 #include <thread>
 #include <algorithm>
 #include <fstream>
 #include <chrono>
 #include <iomanip>
+#include <tuple>
 
 #include <endian.h>
 #include <libusb.h>
@@ -60,6 +62,9 @@ class Imager::impl {
 
 	Frame calib;
 
+	vector<float> bpc_weights;
+	vector<vector<tuple<char,char,int>>> bpc_kinds;
+	vector<tuple<int,int,int>> bpc_list;
  public:
 	impl();
 	~impl();
@@ -86,8 +91,50 @@ uint16_t const * Frame::data() { return &m->data[0]; }
 
 
 Imager::impl::impl()
+ : bpc_weights()
+ , bpc_kinds()
+ , bpc_list()
 {
 	printf("%s:%d\n", __PRETTY_FUNCTION__, __LINE__);
+
+	ifstream is("seek_bpc_2.dat");
+
+	if (is.is_open()) {
+
+		int nb_w;
+		is >> nb_w;
+		bpc_weights.resize(nb_w);
+		for (int i = 0; i < nb_w; i++) {
+			float v;
+			is >> v;
+			bpc_weights[i] = v;
+		}
+
+		int nb_k;
+		is >> nb_k;
+		bpc_kinds.resize(nb_k);
+		for (int i = 0; i < nb_k; i++) {
+			int nb_c;
+			is >> nb_c;
+			bpc_kinds[i].resize(nb_c);
+			for (int j = 0; j < nb_c; j++) {
+				int dx, dy, iw;
+				is >> dy >> dx >> iw;
+				bpc_kinds[i][j] = make_tuple(dx, dy, iw);
+			}
+		}
+
+		int nb_bp;
+		is >> nb_bp;
+		bpc_list.resize(nb_bp);
+		for (int i = 0; i < nb_bp; i++) {
+			int x, y, ik;
+			is >> y >> x >> ik;
+			bpc_list[i] = make_tuple(x, y, ik);
+		}
+
+	}
+
 }
 
 Imager::impl::~impl()
@@ -501,6 +548,21 @@ void Imager::frame_acquire(Frame & frame)
 
 				data[y*w+x] = v;
 			}
+		}
+
+
+		for (int idx_bp = 0; idx_bp < m->bpc_list.size(); idx_bp++) {
+			int x, y, ik;
+			tie(x, y, ik) = m->bpc_list[idx_bp];
+			//intf("Correcting %d %d/%d\n", idx_bp, x, y);
+			auto cnt = m->bpc_kinds[ik];
+			float v = 0;
+			for (int idx_pt = 0; idx_pt < cnt.size(); idx_pt++) {
+				int dx, dy, iw;
+				tie(dx, dy, iw) = cnt[idx_pt];
+				v += data[(y+dy)*w+(x+dx)] * m->bpc_weights[iw];
+			}
+			data[y*w+x] = v;
 		}
 
 		break;
