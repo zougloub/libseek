@@ -8,37 +8,69 @@ import cv2
 if __name__ == '__main__':
 	images = []
 	for i in range(1000):
-		filename = 'frame-%03d.pgm' % i
+		if i in (0, 1,2,3,4, 5):
+			continue
+		filename = 'frame-%03d-raw.pgm' % i
 		if not os.path.isfile(filename):
 			print("Stop at %d" % i)
 			break
-		img = np.float32(cv2.imread(filename))/65535
+		img = cv2.imread(filename, flags=cv2.IMREAD_ANYDEPTH)
+		if img.dtype == np.uint16:
+			img = np.float64(img)/65535
+		if img.dtype == np.uint8:
+			img = np.float64(img)/255
 		images.append(img)
-	
-	# Find out spots which are always the same
-	s = np.zeros_like(images[0])
+
+	"""
+	Find out spots which are always the same...
+	These pixels are really dead.
+	"""
+	img_avg = np.zeros_like(images[0])
 	for i, img in enumerate(images):
-		s += img
-	
-	s /= len(images)
+		img_avg += img
+	img_avg /= len(images)
 
-	cv2.imwrite("avg.png", s/s.max()*255)
+	cv2.imwrite("calib-avg.png", img_avg/img_avg.max()*255)
 
+	img_std = np.zeros_like(images[0])
+	for i, img in enumerate(images):
+		img_std += (img - img_avg)**2
+	img_std = (img_std / len(images)) ** 0.5
 
-	grid = np.zeros_like(s)
+	cv2.imwrite("calib-std.png", img_std/img_std.max()*255)
+
+	print("Std. min: %.9f" % img_std.min())
+	print("Std. max: %.9f" % img_std.max())
+	print("Std. avg: %.9f" % img_std.mean())
+
+	std_threshold = 0.001
+	img_dead = np.zeros_like(img_avg)
+	img_dead[img_std < std_threshold] = 1
+
+	cv2.imwrite("calib-bpc-dead.png", img_dead*255)
+
+	raise SystemExit()
+
+	"""
+	OK, now what do we do with the rest... the std. image is really
+	showing that we need to do something.
+	"""
+
+	grid = np.zeros_like(img_avg)
 	for i, img in enumerate(images):
 		a = np.abs(img-cv2.blur(img, (9,9)))
 		cv2.imwrite("grid-%03d.png" % i, a/a.max()*255)
 
 		# don't use right border
-		a[:,-3:] = 0
+		#a[:,-3:] = 0
 
 		grid += a
 
-	grid[grid>0.5] = 1
-	grid[grid<=0.5] = 0
+	thresh = 0.25
 
-	grid /= grid.max()
+	grid[grid>thresh] = 1
+	grid[grid<=thresh] = 0
+
 	cv2.imwrite("1grid.png", grid*255)
 
 	if 1:

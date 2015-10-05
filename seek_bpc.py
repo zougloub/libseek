@@ -167,7 +167,7 @@ if __name__ == '__main__':
 	"""
 	Process the file that was generated from test-calib.py
 	"""
-	img = np.float32(cv2.imread("1grid.png", cv2.IMREAD_GRAYSCALE))/255
+	img = np.float32(cv2.imread("calib-bpc-dead.png", cv2.IMREAD_GRAYSCALE))/255
 
 	bpc = BPC_Static(img)
 
