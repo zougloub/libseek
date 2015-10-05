@@ -32,6 +32,54 @@ using namespace LibSeek;
 # endif
 #endif
 
+/*!
+
+  https://github.com/lod/seek-thermal-documentation/wiki/Seek-Software
+
+*/
+struct Request {
+	enum Enum {
+	 BEGIN_MEMORY_WRITE              = 82,
+	 COMPLETE_MEMORY_WRITE           = 81,
+	 GET_BIT_DATA                    = 59,
+	 GET_CURRENT_COMMAND_ARRAY       = 68,
+	 GET_DATA_PAGE                   = 65,
+	 GET_DEFAULT_COMMAND_ARRAY       = 71,
+	 GET_ERROR_CODE                  = 53,
+	 GET_FACTORY_SETTINGS            = 88,
+	 GET_FIRMWARE_INFO               = 78,
+	 GET_IMAGE_PROCESSING_MODE       = 63,
+	 GET_OPERATION_MODE              = 61,
+	 GET_RDAC_ARRAY                  = 77,
+	 GET_SHUTTER_POLARITY            = 57,
+	 GET_VDAC_ARRAY                  = 74,
+	 READ_CHIP_ID                    = 54,
+	 RESET_DEVICE                    = 89,
+	 SET_BIT_DATA_OFFSET             = 58,
+	 SET_CURRENT_COMMAND_ARRAY       = 67,
+	 SET_CURRENT_COMMAND_ARRAY_SIZE  = 66,
+	 SET_DATA_PAGE                   = 64,
+	 SET_DEFAULT_COMMAND_ARRAY       = 70,
+	 SET_DEFAULT_COMMAND_ARRAY_SIZE  = 69,
+	 SET_FACTORY_SETTINGS            = 87,
+	 SET_FACTORY_SETTINGS_FEATURES   = 86,
+	 SET_FIRMWARE_INFO_FEATURES      = 85,
+	 SET_IMAGE_PROCESSING_MODE       = 62,
+	 SET_OPERATION_MODE              = 60,
+	 SET_RDAC_ARRAY                  = 76,
+	 SET_RDAC_ARRAY_OFFSET_AND_ITEMS = 75,
+	 SET_SHUTTER_POLARITY            = 56,
+	 SET_VDAC_ARRAY                  = 73,
+	 SET_VDAC_ARRAY_OFFSET_AND_ITEMS = 72,
+	 START_GET_IMAGE_TRANSFER        = 83,
+	 TARGET_PLATFORM                 = 84,
+	 TOGGLE_SHUTTER                  = 55,
+	 UPLOAD_FIRMWARE_ROW_SIZE        = 79,
+	 WRITE_MEMORY_DATA               = 80,
+	};
+};
+
+
 class Frame::impl {
  public:
 	int width = 208;
@@ -237,100 +285,165 @@ void Imager::impl::init()
 	printf("\nClaimed Interface\n");
 
 	// device setup sequence
+
 	try {
 		vector<uint8_t> data = {0x01};
-		vendor_transfer(0, 0x54, 0, 0, data);
+		char req(Request::TARGET_PLATFORM);
+		vendor_transfer(0, req, 0, 0, data);
 	}
 	catch (...) {
 		// Try deinit device and repeat.
 		vector<uint8_t> data = { 0x00, 0x00 };
-		vendor_transfer(0, 0x3C, 0, 0, data);
-		vendor_transfer(0, 0x3C, 0, 0, data);
-		vendor_transfer(0, 0x3C, 0, 0, data);
-		vendor_transfer(0, 0x54, 0, 0, data);
+		{
+			char req(Request::SET_OPERATION_MODE);
+			vendor_transfer(0, req, 0, 0, data);
+			vendor_transfer(0, req, 0, 0, data);
+			vendor_transfer(0, req, 0, 0, data);
+		}
+
+		{
+			char req(Request::TARGET_PLATFORM);
+			vendor_transfer(0, req, 0, 0, data);
+		}
 	}
 
 	{
+		char req(Request::SET_OPERATION_MODE);
 		vector<uint8_t> data = {0x00, 0x00};
-		vendor_transfer(0, 0x3c, 0, 0, data);
+		vendor_transfer(0, req, 0, 0, data);
 	}
 
 	{
+		char req(Request::GET_FIRMWARE_INFO);
 		vector<uint8_t> data(4);
-		vendor_transfer(1, 0x4e, 0, 0, data);
+		vendor_transfer(1, req, 0, 0, data);
+		printf("Response: ");
+		for (int i = 0; i < data.size(); i++) {
+			printf(" %2x", data[i]);
+		}
+		printf("\n");
 	}
 
 	{
+		char req(Request::READ_CHIP_ID);
 		vector<uint8_t> data(12);
-		vendor_transfer(1, 0x36, 0, 0, data);
+		vendor_transfer(1, req, 0, 0, data);
+		printf("Response: ");
+		for (int i = 0; i < data.size(); i++) {
+			printf(" %2x", data[i]);
+		}
+		printf("\n");
 	}
 
 
 	{
+		char req(Request::SET_FACTORY_SETTINGS_FEATURES);
 		vector<uint8_t> data = { 0x20, 0x00, 0x30, 0x00, 0x00, 0x00 };
-		vendor_transfer(0, 0x56, 0, 0, data);
+		vendor_transfer(0, req, 0, 0, data);
 	}
 
 	{
+		char req(Request::GET_FACTORY_SETTINGS);
 		vector<uint8_t> data(64);
-		vendor_transfer(1, 0x58, 0, 0, data);
+		vendor_transfer(1, req, 0, 0, data);
+		printf("Response: ");
+		for (int i = 0; i < data.size(); i++) {
+			printf(" %2x", data[i]);
+		}
+		printf("\n");
 	}
 
 	{
+		char req(Request::SET_FACTORY_SETTINGS_FEATURES);
 		vector<uint8_t> data = { 0x20, 0x00, 0x50, 0x00, 0x00, 0x00 };
-		vendor_transfer(0, 0x56, 0, 0, data);
+		vendor_transfer(0, req, 0, 0, data);
 	}
 
 
 	{
+		char req(Request::GET_FACTORY_SETTINGS);
 		vector<uint8_t> data(64);
-		vendor_transfer(1, 0x58, 0, 0, data);
+		vendor_transfer(1, req, 0, 0, data);
+		printf("Response: ");
+		for (int i = 0; i < data.size(); i++) {
+			printf(" %2x", data[i]);
+		}
+		printf("\n");
 	}
 
 	{
+		char req(Request::SET_FACTORY_SETTINGS_FEATURES);
 		vector<uint8_t> data = { 0x0c, 0x00, 0x70, 0x00, 0x00, 0x00 };
-		vendor_transfer(0, 0x56, 0, 0, data);
+		vendor_transfer(0, req, 0, 0, data);
 	}
 
 
 	{
+		char req(Request::GET_FACTORY_SETTINGS);
 		vector<uint8_t> data(24);
-		vendor_transfer(1, 0x58, 0, 0, data);
+		vendor_transfer(1, req, 0, 0, data);
+		printf("Response: ");
+		for (int i = 0; i < data.size(); i++) {
+			printf(" %2x", data[i]);
+		}
+		printf("\n");
 	}
 
 	{
+		char req(Request::SET_FACTORY_SETTINGS_FEATURES);
 		vector<uint8_t> data = { 0x06, 0x00, 0x08, 0x00, 0x00, 0x00 };
-		vendor_transfer(0, 0x56, 0, 0, data);
+		vendor_transfer(0, req, 0, 0, data);
 	}
 
 	{
+		char req(Request::GET_FACTORY_SETTINGS);
 		vector<uint8_t> data(12);
-		vendor_transfer(1, 0x58, 0, 0, data);
+		vendor_transfer(1, req, 0, 0, data);
+		printf("Response: ");
+		for (int i = 0; i < data.size(); i++) {
+			printf(" %2x", data[i]);
+		}
+		printf("\n");
 	}
 
 	{
+		char req(Request::SET_IMAGE_PROCESSING_MODE);
 		vector<uint8_t> data = { 0x08, 0x00 };
-		vendor_transfer(0, 0x3E, 0, 0, data);
+		vendor_transfer(0, req, 0, 0, data);
 	}
 
 	{
+		char req(Request::GET_OPERATION_MODE);
 		vector<uint8_t> data(2);
-		vendor_transfer(1, 0x3d, 0, 0, data);
+		vendor_transfer(1, req, 0, 0, data);
+		printf("Response: ");
+		for (int i = 0; i < data.size(); i++) {
+			printf(" %2x", data[i]);
+		}
+		printf("\n");
 	}
 
 	{
+		char req(Request::SET_IMAGE_PROCESSING_MODE);
 		vector<uint8_t> data = { 0x08, 0x00 };
-		vendor_transfer(0, 0x3E, 0, 0, data);
+		vendor_transfer(0, req, 0, 0, data);
 	}
 
 	{
+		char req(Request::SET_OPERATION_MODE);
 		vector<uint8_t> data = { 0x01, 0x00 };
-		vendor_transfer(0, 0x3C, 0, 0, data);
+		vendor_transfer(0, req, 0, 0, data);
 	}
 
 	{
+		char req(Request::GET_OPERATION_MODE);
 		vector<uint8_t> data(2);
-		vendor_transfer(1, 0x3d, 0, 0, data);
+		vendor_transfer(1, req, 0, 0, data);
+		printf("Response: ");
+		for (int i = 0; i < data.size(); i++) {
+			printf(" %2x", data[i]);
+		}
+		printf("\n");
 	}
 }
 
@@ -343,10 +456,13 @@ void Imager::impl::exit()
 		return;
 	}
 
-	vector<uint8_t> data = { 0x00, 0x00 };
-	vendor_transfer(0, 0x3C, 0, 0, data);
-	vendor_transfer(0, 0x3C, 0, 0, data);
-	vendor_transfer(0, 0x3C, 0, 0, data);
+	{
+		char req(Request::SET_OPERATION_MODE);
+		vector<uint8_t> data = { 0x00, 0x00 };
+		vendor_transfer(0, req, 0, 0, data);
+		vendor_transfer(0, req, 0, 0, data);
+		vendor_transfer(0, req, 0, 0, data);
+	}
 
 	if (handle != NULL) {
 		res = libusb_release_interface(handle, 0);
