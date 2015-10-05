@@ -25,6 +25,7 @@ class Frame {
 	int width();
 	int height();
 	uint16_t const * data();
+	uint8_t const * rawdata();
 };
 
 class Imager {
@@ -43,6 +44,7 @@ class Imager {
 
  public:
 	void frame_init(Frame & frame);
+	void frame_acquire_raw(Frame & img);
 	void frame_acquire(Frame & img);
 	void frame_exit(Frame & frame);
 

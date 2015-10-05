@@ -65,6 +65,7 @@ class Imager::impl {
 	vector<float> bpc_weights;
 	vector<vector<tuple<char,char,int>>> bpc_kinds;
 	vector<tuple<int,int,int>> bpc_list;
+
  public:
 	impl();
 	~impl();
@@ -78,17 +79,31 @@ class Imager::impl {
 	void frame_get_one(Frame & frame);
 };
 
-inline void sleep(float secs) {
+inline void sleep(float secs)
+{
 	chrono::milliseconds dura(int(1000*secs));
 	this_thread::sleep_for(dura);
 }
 
-int Frame::width() { return m->width; }
+int Frame::width()
+{
+	return m->width;
+}
 
-int Frame::height() { return m->height; }
+int Frame::height()
+{
+	return m->height;
+}
 
-uint16_t const * Frame::data() { return &m->data[0]; }
+uint16_t const * Frame::data()
+{
+	return &m->data[0];
+}
 
+uint8_t const * Frame::rawdata()
+{
+	return &m->rawdata[0];
+}
 
 Imager::impl::impl()
  : bpc_weights()
@@ -460,19 +475,24 @@ void Imager::impl::frame_get_one(Frame & frame)
 			done += actual_length;
 		}
 	}
+}
 
-	int w = frame.width();
-	int h = frame.height();
+void Imager::frame_acquire_raw(Frame & frame)
+{
+	m->frame_get_one(frame);
+	vector<uint8_t> & rawdata = frame.m->rawdata;
+
+	uint8_t status = rawdata[20];
+	printf("Status byte: %2x\n", status);
 }
 
 void Imager::frame_acquire(Frame & frame)
 {
 	while (true) {
-		m->frame_get_one(frame);
+		frame_acquire_raw(frame);
 		vector<uint8_t> & rawdata = frame.m->rawdata;
 
 		uint8_t status = rawdata[20];
-		printf("Status byte: %2x\n", status);
 
 		if (status == 1) {
 			m->calib.m->rawdata = frame.m->rawdata;
