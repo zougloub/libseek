@@ -69,21 +69,6 @@ int main() {
 			fwrite((uint8_t*)img.data(), sizeof(uint16_t), w*h, stdout);
 		}
 
-		if (0) {
-			char filename[30];
-			sprintf(filename, "frame-%03d.pgm", i);
-			FILE * f = fopen(filename, "wb");
-			int res = fprintf(f, "P5 %d %d 65535\n", w, h);
-			for (int y = 0; y < h; y++) {
-				for (int x = 0; x < w; x++) {
-					uint16_t v = img[y*w+x];
-					v = htobe16(v);
-					res = fwrite((uint8_t*)&v, sizeof(uint16_t), 1, f);
-				}
-			}
-			fclose(f);
-		}
-
 	}
 
 	iface.frame_exit(frame);

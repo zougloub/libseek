@@ -33,10 +33,10 @@ int main() {
 		int res = fprintf(f, "P5 %d %d 65535\n", w, h);
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
-				uint16_t v = *&frame.rawdata()[2*(y*w+x)];
-				v = le16toh(v);
-				v = htobe16(v);
-				res = fwrite((uint8_t*)&v, sizeof(uint16_t), 1, f);
+				uint8_t lsb = frame.rawdata()[2*(y*w+x)];
+				uint8_t msb = frame.rawdata()[2*(y*w+x)+1];
+				res = fwrite(&msb, sizeof(uint8_t), 1, f);
+				res = fwrite(&lsb, sizeof(uint8_t), 1, f);
 			}
 		}
 		fclose(f);
