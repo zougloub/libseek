@@ -626,18 +626,6 @@ void Imager::frame_acquire(Frame & frame)
 		int h = frame.height();
 		int w = frame.width();
 
-		auto get_value = [&](int _y, int _x) -> int {
-			uint16_t v = reinterpret_cast<uint16_t*>
-			(rawdata.data())[_y*w+_x];
-			v = le16toh(v);
-			int a = v;
-			uint16_t v_cal = reinterpret_cast<uint16_t*>
-			(m->calib.m->rawdata.data())[_y*w+_x];
-			v_cal = le16toh(v_cal);
-			a -= v_cal;
-			return a;
-		};
-
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
 				int a;
@@ -651,24 +639,6 @@ void Imager::frame_acquire(Frame & frame)
 				v_cal = le16toh(v_cal);
 
 				a = int(v) - int(v_cal);
-
-
-				// basic black spot correction
-				if (x > 0 & x < w && y > 0 && y < h
-				 && v == 0 && v_cal == 0) {
-					a = 0
-					 + get_value(y-1, x-1)
-					 + get_value(y-1, x+0)
-					 + get_value(y-1, x+1)
-					 + get_value(y+0, x-1)
-					 + 0
-					 + get_value(y+0, x+1)
-					 + get_value(y+1, x-1)
-					 + get_value(y+1, x+0)
-					 + get_value(y+1, x+1)
-					 ;
-					a /= 8;
-				}
 
 				// level shift
 				a += 0x8000;
