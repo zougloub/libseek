@@ -51,6 +51,8 @@ Alternately, you can contact `me <mailto:cJ-libseek@zougloub.eu>`_ directly.
 Credits
 #######
 
+This library is using bits and pieces from work done by other people.
+
 Thanks to `Stephen Stair <https://github.com/sgstair>`_ who put
 working code on github, and to the rest of the people discussing on
 the `Yet another cheap thermal imager incoming.. Seek Thermal thread
@@ -58,6 +60,9 @@ of the EEVblog Electronics Community Forum
 <http://www.eevblog.com/forum/testgear/yet-another-cheap-thermal-imager-incoming/>`_
 which was about the only thing I found when looking for existing stuff
 for my camera, once I could plug it on a real computer.
+
+Thanks to `David Tulloh <https://github.com/lod>`_ for creating and maintaining
+https://github.com/lod/seek-thermal-documentation/
 
 
 Legal
