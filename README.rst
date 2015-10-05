@@ -25,6 +25,21 @@ The example can be plugged onto ffmpeg like this:
     | ffplay -i - -f rawvideo -video_size 208x156 -pixel_format gray16le
 
 
+The library performs bad pixels correction based on a list of bad
+pixels; that list can be obtained by running:
+
+.. code:: sh
+
+   # Get 100 raw frames... move the camera around while this runs
+   ./build/seek-test-calib
+
+   # Generate bad pixels image
+   ./test-calib.py
+
+   # Generate bad pixels correction structure
+   ./seek_bpc.py
+
+
 Installation
 ############
 
