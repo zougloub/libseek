@@ -99,8 +99,8 @@ class BPC_Static(object):
 			while True:
 				#print("Current distance: %.3f" % (current_d))
 
-				for y in range(h):
-					for x in range(w):
+				for y in range(max(0,y0-max_d), min(h, y0+max_d)): #range(h):
+					for x in range(max(0,x0-max_d), min(w, x0+max_d)): #range(w):
 						dist = math.hypot(y-y0,x-x0)
 						if dist > last_d and dist <= current_d:
 							if img[y,x] == 0: # good pixel
