@@ -291,23 +291,3 @@ neighboring cells.
 The locations are predicted, but it's also possible to identify them
 because the values are also missing in calibration frames.
 
-
-Library Design
-**************
-
-Black pixels are detected by noticing that their value is zero both in
-the calibration frame and in the image frames.
-
-.. TODO:: actually see whether that's the right way, doing a dump
-
-
-Bad pixels are identified (in ``test-calib.py``)
-by summing over many frames, the difference between pixel data and
-neighboring pixels. This has proven simple enough.
-
-Bad pixels are corrected (in ``test-viewer.py``)
-by considering the blurred image instead of the original image, at the
-location of bad pixels.
-
-Absolute temperature readings are provided by TODO.
-
