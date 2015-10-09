@@ -40,6 +40,7 @@ def build(bld):
 	 features='cxx cxxprogram',
 	 source='seek-test.cpp',
 	 use='seek',
+	)
 
 	bld(
 	 target='seek-test-calib',
