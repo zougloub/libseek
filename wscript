@@ -11,7 +11,7 @@ def configure(conf):
 	conf.load('compiler_cxx')
 
 	if conf.env.CXX_NAME in ('gcc', 'clang'):
-		conf.env.CXXFLAGS += [ '-std=c++11' ]
+		conf.env.CXXFLAGS += [ '-std=c++11', '-fpic' ]
 
 	conf.check_cfg(package='libusb-1.0', args='--cflags --libs',
 	 uselib_store="LIBUSB")
