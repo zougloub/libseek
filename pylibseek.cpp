@@ -169,6 +169,7 @@ static PyMethodDef libseekMethods[] = {
         {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+#if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef pylibseekmodule = {
         PyModuleDef_HEAD_INIT,
         "libseek_python",   /* name of module */
@@ -182,3 +183,9 @@ PyMODINIT_FUNC
 PyInit_pylibseek(void) {
     return PyModule_Create(&pylibseekmodule);
 }
+#else
+PyMODINIT_FUNC
+initpylibseek(void) {
+    PyObject *module = Py_InitModule("pylibseek", libseekMethods);
+}
+#endif
