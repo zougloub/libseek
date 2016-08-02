@@ -600,6 +600,21 @@ void Imager::frame_acquire_raw(Frame & frame)
 
 	uint8_t status = rawdata[20];
 	printf("Status byte: %2x\n", status);
+#if 0
+	{
+		uint16_t ctr = *reinterpret_cast<uint16_t const *>(&rawdata[2]);
+		ctr = le16toh(ctr);
+		fprintf(stderr, "Temperature thingy: %d\n", ctr);
+	}
+#endif
+
+#if 0
+	{
+		uint16_t ctr = *reinterpret_cast<uint16_t const *>(&rawdata[80]);
+		ctr = le16toh(ctr);
+		fprintf(stderr, "Frame counter: %d\n", ctr);
+	}
+#endif
 }
 
 void Imager::frame_acquire(Frame & frame)

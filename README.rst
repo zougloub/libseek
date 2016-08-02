@@ -33,7 +33,7 @@ pixels; that list can be obtained by running:
    # Get 100 raw frames... move the camera around while this runs
    ./build/seek-test-calib
 
-   # Generate bad pixels image
+   # Generate bad pixels images (calib-avg.png, calib-std.png, calib-bpc-dead.png)
    ./test-calib.py
 
    # Generate bad pixels correction structure
@@ -281,7 +281,10 @@ status byte located at position 20:
 
 - Regular frames (code 3)
 - Flat Field Calibration frames (code 1)
+- Drift Calibration frames (code 4 or 10)
 - Unusable frames (code 6), probably because the shutter is in progress
+- TBD (code 8)
+- TBD (code 7)
 - ...
 
 The raw frame data contains regular "holes", values that are "black
@@ -290,4 +293,13 @@ The missing values are reconstructed using interpolation from
 neighboring cells.
 The locations are predicted, but it's also possible to identify them
 because the values are also missing in calibration frames.
+
+Special frame locations:
+
+- At position 2, something that looks like it is related to the device
+  temperature.
+
+- At position 20, the frame code
+
+- At position 80, a frame counter.
 
