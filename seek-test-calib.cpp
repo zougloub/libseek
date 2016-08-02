@@ -28,7 +28,8 @@ int main() {
 		int h = frame.height();
 		int w = frame.width();
 		char filename[30];
-		sprintf(filename, "frame-%03d-raw.pgm", i);
+		char status = frame.rawdata()[20];
+		sprintf(filename, "frame-%03d-raw-%d.pgm", i, status);
 		FILE * f = fopen(filename, "wb");
 		int res = fprintf(f, "P5 %d %d 65535\n", w, h);
 		for (int y = 0; y < h; y++) {

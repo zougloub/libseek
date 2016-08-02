@@ -7,13 +7,19 @@ import cv2
 
 if __name__ == '__main__':
 	images = []
-	for i in range(1000):
-		if i in (0, 1,2,3,4, 5):
+
+	files = sorted(os.listdir("."))
+
+	for filename in files:
+		m = re.match(r"frame-(\d{3})-raw-(?P<type>\d).pgm", filename)
+		if m is None:
 			continue
-		filename = 'frame-%03d-raw.pgm' % i
-		if not os.path.isfile(filename):
-			print("Stop at %d" % i)
-			break
+
+		code = int(m.group("type"))
+
+		if code != 3:
+			continue
+
 		img = cv2.imread(filename, flags=cv2.IMREAD_ANYDEPTH)
 		if img.dtype == np.uint16:
 			img = np.float64(img)/65535
@@ -43,7 +49,7 @@ if __name__ == '__main__':
 	print("Std. max: %.9f" % img_std.max())
 	print("Std. avg: %.9f" % img_std.mean())
 
-	std_threshold = 0.001
+	std_threshold = 0.0005
 	img_dead = np.zeros_like(img_avg)
 	img_dead[img_std < std_threshold] = 1
 
