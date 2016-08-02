@@ -82,12 +82,15 @@ struct Request {
 
 class Frame::impl {
  public:
-	int width = 208;
-	int height = 156;
+	static int width;
+	static int height;
 	vector<uint8_t> rawdata;
 	vector<uint16_t> data;
 	void process();
 };
+
+int Frame::impl::width = 208;
+int Frame::impl::height = 156;
 
 Frame::Frame()
 {
@@ -109,6 +112,12 @@ class Imager::impl {
 	struct libusb_device_descriptor desc;
 
 	Frame calib;
+
+	Frame calib_bpc; // bad pixels map
+	int calib_bpc_nb;
+
+	Frame calib_gain;
+	double calib_gain_mean;
 
 	vector<float> bpc_weights;
 	vector<vector<tuple<char,char,int>>> bpc_kinds;
@@ -160,6 +169,15 @@ Imager::impl::impl()
 {
 	printf("%s:%d\n", __PRETTY_FUNCTION__, __LINE__);
 
+	int w(Frame::impl::width);
+	int h(Frame::impl::height);
+	calib.m->rawdata.resize(w*h*2);
+	calib.m->data.resize(w*h);
+	calib_gain.m->rawdata.resize(w*h*2);
+	calib_gain.m->data.resize(w*h);
+	calib_bpc.m->rawdata.resize(w*h*2);
+	calib_bpc.m->data.resize(w*h);
+
 	ifstream is("seek_bpc_2.dat");
 
 	if (is.is_open()) {
@@ -189,11 +207,13 @@ Imager::impl::impl()
 
 		int nb_bp;
 		is >> nb_bp;
+		calib_bpc_nb = nb_bp;
 		bpc_list.resize(nb_bp);
 		for (int i = 0; i < nb_bp; i++) {
 			int x, y, ik;
 			is >> y >> x >> ik;
 			bpc_list[i] = make_tuple(x, y, ik);
+			calib_bpc.m->data[y*w+x] = 1;
 		}
 
 	}
@@ -550,8 +570,6 @@ void Imager::exit()
 
 void Imager::frame_init(Frame & frame)
 {
-	m->calib.m->rawdata.resize(frame.width()*frame.height()*2);
-	m->calib.m->data.resize(frame.width()*frame.height());
 	frame.m->rawdata.resize(frame.width()*frame.height()*2);
 	frame.m->data.resize(frame.width()*frame.height());
 }
@@ -599,7 +617,8 @@ void Imager::frame_acquire_raw(Frame & frame)
 	vector<uint8_t> & rawdata = frame.m->rawdata;
 
 	uint8_t status = rawdata[20];
-	printf("Status byte: %2x\n", status);
+	fprintf(stderr, "Status byte: %2x\n", status);
+
 #if 0
 	{
 		uint16_t ctr = *reinterpret_cast<uint16_t const *>(&rawdata[2]);
@@ -621,9 +640,47 @@ void Imager::frame_acquire(Frame & frame)
 {
 	while (true) {
 		frame_acquire_raw(frame);
+
+		vector<uint16_t> & data = frame.m->data;
+
+		int h = frame.height();
+		int w = frame.width();
+
 		vector<uint8_t> & rawdata = frame.m->rawdata;
 
 		uint8_t status = rawdata[20];
+
+		if (status == 4) {
+			m->calib_gain.m->rawdata = frame.m->rawdata;
+			printf("Calib gain\n");
+
+			int count(0);
+			m->calib_gain_mean = 0;
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++) {
+					uint16_t v = reinterpret_cast<uint16_t*>
+						(rawdata.data())[y*w+x];
+					v = le16toh(v);
+
+					m->calib_gain.m->data[y*w+x] = v;
+
+					if (m->calib_bpc.data()[y*w+x] != 0) {
+						continue;
+					}
+
+					if (v == 0) {
+						continue;
+					}
+
+					m->calib_gain_mean += v;
+
+					count++;
+				}
+			}
+			m->calib_gain_mean /= count;
+
+			continue;
+		}
 
 		if (status == 1) {
 			m->calib.m->rawdata = frame.m->rawdata;
@@ -632,14 +689,10 @@ void Imager::frame_acquire(Frame & frame)
 		}
 
 		if (status != 3) {
-			printf("Bad\n");
+			fprintf(stderr, "Ignore %d\n", status);
 			continue;
 		}
 
-		vector<uint16_t> & data = frame.m->data;
-
-		int h = frame.height();
-		int w = frame.width();
 
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
@@ -653,7 +706,20 @@ void Imager::frame_acquire(Frame & frame)
 				 (m->calib.m->rawdata.data())[y*w+x];
 				v_cal = le16toh(v_cal);
 
-				a = int(v) - int(v_cal);
+				a = (int(v) - int(v_cal));
+
+				bool isnt_bpc = m->calib_bpc.data()[y*w+x] == 0;
+
+				double gain = 1.0;
+				if (m->calib_gain.data()[y*w+x] > 0) {
+					gain = m->calib_gain_mean / m->calib_gain.data()[y*w+x];
+				}
+				
+				
+				bool has_gain_calib = gain > 1.0/3 && gain < 3.0/1;
+				if (isnt_bpc && has_gain_calib) {
+					a = double(a) * gain;
+				}
 
 				// level shift
 				a += 0x8000;
