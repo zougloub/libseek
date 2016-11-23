@@ -61,7 +61,6 @@ Issues
 The project home is on github: https://github.com/zougloub/libseek
 and issues can be reported there.
 
-Alternately, you can contact `me <mailto:cJ-libseek@zougloub.eu>`_ directly.
 
 Credits
 #######
