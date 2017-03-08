@@ -54,6 +54,9 @@ This is done using something like (assuming you want to install to /usr):
    python waf
    sudo python waf install --destdir /
 
+The test scripts in Python use numpy and OpenCV, so you should have
+those dependencies installed to run the scripts.
+
 
 Issues
 ######
