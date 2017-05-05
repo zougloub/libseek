@@ -9,6 +9,7 @@
 #include <chrono>
 #include <iomanip>
 #include <tuple>
+#include <vector>
 
 #include <endian.h>
 #include <libusb.h>
