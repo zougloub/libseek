@@ -171,11 +171,8 @@ if __name__ == '__main__':
 
 	bpc = BPC_Static(img)
 
-	"""
 	bpc.identify()
 	bpc.save()
-	"""
-
 	bpc.load()
 
 	bpc_kinds = {}
